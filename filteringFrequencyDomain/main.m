@@ -3,7 +3,6 @@ clear;
 clc;
 
 moon = imread('..\Images\exercise1\moon.jpg');
-imshow(moon(:,:,3));
 
 % Why does the image have three dimensions?
 % It may be that each plane represents one of the three colors r,g,b
@@ -23,5 +22,23 @@ end
 % https://www.mathworks.com/matlabcentral/answers/616753-applying-2d-filter-on-rgb-image
 % Essentially I operate upon each channel separately.
 
+% Preprocessing
+% Since it is a grayscale image I may only hold on to one of the channels
+moon_r = moon(:,:,1);
+% Histogram Equalization
+moon_r_equ = histogramEqualization(moon_r, 256);
 
+subplot(2,2,1);
+histogram(moon_r, 256);
+title("Initial histogram");
+subplot(2,2,2);
+imshow(moon_r,[])
+title("Initial image");
+
+subplot(2,2,3);
+histogram(moon_r_equ, 256);
+title("histogram after equalization")
+subplot(2,2,4);
+imshow(moon_r_equ,[])
+title("Image after histogram equalization")
 
