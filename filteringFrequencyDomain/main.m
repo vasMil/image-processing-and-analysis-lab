@@ -3,6 +3,7 @@ clear;
 clc;
 
 moon = imread('..\Images\exercise1\moon.jpg');
+[M, N, d] = size(moon);
 
 % Why does the image have three dimensions?
 % It may be that each plane represents one of the three colors r,g,b
@@ -42,3 +43,14 @@ subplot(2,2,4);
 imshow(moon_r_equ,[])
 title("Image after histogram equalization")
 
+moon_r_equ_cent = moon_r_equ;
+for i=1:M
+    for j=1:N
+        if ~mod(i+j,2)
+            moon_r_equ_cent(i,j) = (-1).*moon_r_equ_cent(i,j);
+        end
+    end
+end
+
+figure;
+imshow(log(1+abs(fft2(moon_r_equ_cent))), []);
