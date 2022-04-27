@@ -1,4 +1,4 @@
-function [outImg] = alternamePixelSigns(inpImg)
+function [outImg] = alternatePixelSigns(inpImg)
     [M, N] = size(inpImg);
     outImg = inpImg;
     for i=1:M

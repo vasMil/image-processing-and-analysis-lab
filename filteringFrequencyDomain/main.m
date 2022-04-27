@@ -53,21 +53,45 @@ title("Image after histogram equalization")
 % Apply DFT property Gonzalez chapter 4, 4.6, page 251 (fourth edition)
 % Circular Frequency Shift is the property used to translate frequency 
 % point (0,0) to the center of the frequency rectangle
-moon_r_equ_cent = alternamePixelSigns(moon_r_equ);
+moon_r_equ_cent = alternatePixelSigns(moon_r_equ);
 figure;
 imshow(moon_r_equ_cent, []);
 title("Image after Histogram Equalization and Circular Frequency Shift");
 
+% Add zero padding (M by N => 2*M by 2*N) Gonzales Chap. 4, 4.6 page 257
+% (fourth edition)
+% required for later filtering (Reminder: Multiplication of the DFT of two
+% signals is their circular convolution in the time domain, thus I need to
+% fix conditions so the resulting circular conv is the same as linear conv
+moon_pad = zeros(2*M, 2*N);
+moon_pad(1:M,1:N) = moon_r_equ_cent;
+
 % Compute 2D DFT, using row-column algorithm
-MOON_R_EQU_CENT = rowColumn_fft(moon_r_equ_cent);
+MOON_PAD = rowColumn_fft(moon_pad);
 % Plot the magnitude
 figure;
 subplot(1,2,1);
-imshow(abs(MOON_R_EQU_CENT), []);
+imshow(abs(MOON_PAD), []);
 title("DFT Magnitude");
 
 subplot(1,2,2);
-imshow(log(abs(MOON_R_EQU_CENT)), []);
+imshow(log(abs(MOON_PAD)), []);
 title("DFT Magnitude in logarithmic scale");
 
+% Create a lowpass Gaussian filter
+H = GLPF(2*M, 2*N, 40);
 
+% Apply the filter (on the frequency domain)
+MOON_BLURR_PAD = MOON_PAD.*H;
+
+% Return back to the spacial domain
+% Due to computational inaccuracies IDFT results to a complex matrix in the
+% spacial domain, even though the input image is real and the
+% Gaussian LowPass Filter is both real and symmetric, thus I only take the
+% real part of the IDFT.
+% Gonzales (4th edition, Ch. 4, 4.7 page 267)
+moon_blur = real(ifft2(MOON_BLURR_PAD));
+moon_blur = alternatePixelSigns(moon_blur(1:M,1:N));
+figure;
+imshow(moon_blur, []);
+title("Moon after Histogram Equalization and Lowpass filter");
