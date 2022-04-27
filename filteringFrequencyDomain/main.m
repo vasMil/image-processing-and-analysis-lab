@@ -35,6 +35,7 @@ moon_r = moon(:,:,1);
 % https://towardsdatascience.com/histogram-equalization-5d1013626e64#:~:text=A%20color%20histogram,of%20the%20image.
 moon_r_equ = histogramEqualization(moon_r, 256);
 
+figure;
 subplot(2,2,1);
 histogram(moon_r, 256);
 title("Initial histogram");
@@ -49,11 +50,24 @@ subplot(2,2,4);
 imshow(moon_r_equ,[])
 title("Image after histogram equalization")
 
-moon_r_equ_cent = moon_r_equ;
-for i=1:M
-    for j=1:N
-        if ~mod(i+j,2)
-            moon_r_equ_cent(i,j) = (-1).*moon_r_equ_cent(i,j);
-        end
-    end
-end
+% Apply DFT property Gonzalez chapter 4, 4.6, page 251 (fourth edition)
+% Circular Frequency Shift is the property used to translate frequency 
+% point (0,0) to the center of the frequency rectangle
+moon_r_equ_cent = alternamePixelSigns(moon_r_equ);
+figure;
+imshow(moon_r_equ_cent, []);
+title("Image after Histogram Equalization and Circular Frequency Shift");
+
+% Compute 2D DFT, using row-column algorithm
+MOON_R_EQU_CENT = rowColumn_fft(moon_r_equ_cent);
+% Plot the magnitude
+figure;
+subplot(1,2,1);
+imshow(abs(MOON_R_EQU_CENT), []);
+title("DFT Magnitude");
+
+subplot(1,2,2);
+imshow(log(abs(MOON_R_EQU_CENT)), []);
+title("DFT Magnitude in logarithmic scale");
+
+
