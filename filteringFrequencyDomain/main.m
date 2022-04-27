@@ -10,7 +10,7 @@ moon = imread('..\Images\exercise1\moon.jpg');
 t0 = all(moon(:,:,1) == moon(:,:,2),'all');
 t1 = all(moon(:,:,1) == moon(:,:,3),'all');
 if (t0 == t1)
-    disp("All 3 planes have the save values");
+    disp("All 3 planes have the same values");
 end
 % But if that is the case then why are all planes identical?
 % Answer:
@@ -27,6 +27,12 @@ end
 % Since it is a grayscale image I may only hold on to one of the channels
 moon_r = moon(:,:,1);
 % Histogram Equalization
+% In the case of a colored image, it is still possible to apply histogram
+% equalization to each layer independently, but I would get significant
+% changes on the color balance of the image.
+% Sources:
+% https://en.wikipedia.org/wiki/Histogram_equalization#:~:text=The%20above%20describes,applying%20the%20algorithm.
+% https://towardsdatascience.com/histogram-equalization-5d1013626e64#:~:text=A%20color%20histogram,of%20the%20image.
 moon_r_equ = histogramEqualization(moon_r, 256);
 
 subplot(2,2,1);
@@ -51,6 +57,3 @@ for i=1:M
         end
     end
 end
-
-figure;
-imshow(log(1+abs(fft2(moon_r_equ_cent))), []);
