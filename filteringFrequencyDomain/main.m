@@ -84,14 +84,36 @@ H = GLPF(2*M, 2*N, 40);
 % Apply the filter (on the frequency domain)
 MOON_BLURR_PAD = MOON_PAD.*H;
 
-% Return back to the spacial domain
+% Return back to the spatial domain
+% I may use the forward 2D fft algorithm on the complex conjugate of the
+% signal on the frequency domain, that is F*(u,v). This will return
+% MNf*(x,y). Thus taking the complex conjugate of that and dividing the
+% result by MN, results to f(x,y). (4th edition, Ch. 4, 4.11 page 304)
+moon_blur = rowColumn_fft(conj(MOON_BLURR_PAD));
+
 % Due to computational inaccuracies IDFT results to a complex matrix in the
-% spacial domain, even though the input image is real and the
+% spatial domain, even though the input image is real and the
 % Gaussian LowPass Filter is both real and symmetric, thus I only take the
 % real part of the IDFT.
 % Gonzales (4th edition, Ch. 4, 4.7 page 267)
-moon_blur = real(ifft2(MOON_BLURR_PAD));
+moon_blur = real(moon_blur);
+% Note that if that was not the case, that is I knew that the IDFT would
+% result to a complex matrix, I should take the conj(moon_blur). In reality
+% I could do the same here but it is not necessary, since the complex
+% conjugate of a real number is that number.
+
+% Restore the position (0,0) to the top left corner of the frequency
+% rectangle.
 moon_blur = alternatePixelSigns(moon_blur(1:M,1:N));
+
+% Devide with MN
+% REMINDER: The size of the matrix in the frequency domain is not [M, N]
+% but [P, Q] == [2*M, 2*N], thus you need to divide with 4*M*N.
+% Gonzales' formula (4-158, page 304 of the fourh edition) is the general
+% case formula!
+moon_blur = moon_blur/(4*M*N);
+
+% Plot the result
 figure;
 imshow(moon_blur, []);
 title("Moon after Histogram Equalization and Lowpass filter");
