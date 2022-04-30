@@ -24,7 +24,11 @@ function [k] = calcBlindWieners_k(inpImg, rows, cols)
             block = inpImg(x:x+rows-1,y:y+rows-1);
             signal = mean(block,'all');
             noise = std(block,0,'all');
-            k(x:x+rows-1,y:y+rows-1) = noise/signal;
+            if (noise == 0 || signal == 0)
+                k(x:x+rows-1,y:y+rows-1) = 0;
+            else
+                k(x:x+rows-1,y:y+rows-1) = noise/signal;
+            end
         end
     end
     k = k(1:M,1:N);
