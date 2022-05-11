@@ -4,47 +4,56 @@ clc;
 
 blockSize = 32;
 bandRadius = 20;
+r = 99;
 
 load("../Images/exercise2/barbara.mat");
 barbara = im2double(barbara);
 
 [M, N, d] = size(barbara);
 
-% Apply DCT on blocks
-BARBARA = zeros(M, N, d);
+BARBARA = zeros(M, N, d); % DCT{barbara}
+BARBARA_ZONAL = zeros(M, N, d);
+BARBARA_TYP_ZONAL = zeros(M, N, d);
+BARBARA_THRES = zeros(M, N, d);
+BARBARA_GLOB_THRES = zeros(M, N, d);
+barbara_zonal = zeros(M, N, d);
+barbara_typ_zonal = zeros(M, N, d);
+barbara_thres = zeros(M, N, d);
+barbara_glob_thres = zeros(M, N, d);
 for k=1:d
+    % Apply DCT on blocks
     for i=1:blockSize:M
         for j=1:blockSize:N
             BARBARA(i:i+blockSize-1, j:j+blockSize-1, k) =...
                 dct2(barbara(i:i+blockSize-1, j:j+blockSize-1, k));               
         end
     end
-end
 
-% Band Method
-BARBARA_BAND = BARBARA;
-for k=1:d
-    for i=1:M
-        for j=1:N
-            r = mod(i,bloc
-            if (r+c > bandRadius)
-                BARBARA_BAND(i+r-1,j+c-1,k) = 0;
-            end
-        end
-    end
-end
+    % Zonal Masking
+    BARBARA_ZONAL(:,:,k) = applyZonalMask(BARBARA(:,:,k),blockSize,r);
+    % Typical Zonal Masking
+    BARBARA_TYP_ZONAL(:,:,k) =...
+        applyTypicalZonalMask(BARBARA(:,:,k),blockSize,r);
+    % Threshold Mask
+    BARBARA_THRES(:,:,k) = applyThresholdMask(BARBARA(:,:,k),blockSize,r);
+    % Global Threshold Mask
+    BARBARA_THRES(:,:,k) = applyThresholdMask(BARBARA(:,:,k),blockSize,r);
 
-% Get back to spatial domain
-compressedBarbara = zeros(M, N, d);
-for k=1:d
+    % Get back to spatial domain
     for i=1:blockSize:M
         for j=1:blockSize:N
-            compressedBarbara(i:i+blockSize-1, j:j+blockSize-1, k) =...
-                idct2(BARBARA_BAND(i:i+blockSize-1, j:j+blockSize-1, k));               
+            barbara_zonal(i:i+blockSize-1, j:j+blockSize-1, k) =...
+                idct2(BARBARA_ZONAL(i:i+blockSize-1, j:j+blockSize-1, k));
+            barbara_typ_zonal(i:i+blockSize-1, j:j+blockSize-1, k) =...
+                idct2(BARBARA_TYP_ZONAL...
+                (i:i+blockSize-1, j:j+blockSize-1, k));
+            barbara_thres(i:i+blockSize-1, j:j+blockSize-1, k) =...
+                idct2(BARBARA_THRES(i:i+blockSize-1, j:j+blockSize-1, k));
         end
     end
 end
 
+%% Barbara in spatial and freq domain
 figure;
 subplot(1,2,1);
 imshow(barbara);
@@ -53,19 +62,60 @@ subplot(1,2,2);
 imshow(BARBARA);
 title("Barbara DCT");
 
-figure;
+%% Zonal mask figures
+figure("Name", "Results of zonal masking viewed on the frequency domain");
 subplot(1,2,1);
 imshow(BARBARA);
 title("Barbara DCT");
 subplot(1,2,2);
-imshow(BARBARA_BAND);
-title(strcat("Barbara DCT, preserving DCT coefficients in radius of ",...
-    num2str(bandRadius)));
+imshow(BARBARA_ZONAL);
+title(strcat("Barbara DCT, preserving ", num2str(r)...
+    ,"% of the coefficients"));
 
-figure;
+figure("Name", "Results of zonal masking viewed on the spatial domain");
 subplot(1,2,1);
 imshow(barbara);
 title("Original Image");
 subplot(1,2,2);
-imshow(compressedBarbara);
-title("Compressed Image");
+imshow(barbara_zonal);
+title("Compressed Image using a zonal mask");
+
+%% Typical zonal mask figures
+figure("Name",...
+    "Results of typical zonal masking viewed on the frequency domain");
+subplot(1,2,1);
+imshow(BARBARA);
+title("Barbara DCT");
+subplot(1,2,2);
+imshow(BARBARA_TYP_ZONAL);
+title(strcat("Barbara DCT, preserving ", num2str(r)...
+    ,"% of the coefficients"));
+
+figure("Name",...
+    "Results of typical zonal masking viewed on the spatial domain");
+subplot(1,2,1);
+imshow(barbara);
+title("Original Image");
+subplot(1,2,2);
+imshow(barbara_typ_zonal);
+title("Compressed Image using a typical zonal mask");
+
+%% Threshold mask figures
+figure("Name",...
+    "Results of threshold masking viewed on the frequency domain");
+subplot(1,2,1);
+imshow(BARBARA);
+title("Barbara DCT");
+subplot(1,2,2);
+imshow(BARBARA_THRES);
+title(strcat("Barbara DCT, preserving ", num2str(r)...
+    ,"% of the coefficients"));
+
+figure("Name",...
+    "Results of threshold masking viewed on the spatial domain");
+subplot(1,2,1);
+imshow(barbara);
+title("Original Image");
+subplot(1,2,2);
+imshow(barbara_thres);
+title("Compressed Image using a threshold mask");
