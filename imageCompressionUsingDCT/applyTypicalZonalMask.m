@@ -32,6 +32,9 @@ while i < remainCoef
     elseif(col > blockSize)
         row = row + 1;
         col = col - 1;
+    elseif(col == 0)
+        col = row;
+        row = 1;
     else
         typicalZonalMask(row, col) = 1;
         row = row + 1;

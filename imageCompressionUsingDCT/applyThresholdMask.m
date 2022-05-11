@@ -12,7 +12,7 @@ for i=1:blockSize:M
             reshape(IMG(i:i+blockSize-1,j:j+blockSize-1),1,[]), 'descend');
         thres = sortPix(round(length(sortPix)*r/100));
         thresholdMask(i:i+blockSize-1,j:j+blockSize-1) =...
-            IMG(i:i+blockSize-1,j:j+blockSize-1) > thres;
+            IMG(i:i+blockSize-1,j:j+blockSize-1) >= thres;
     end
 end
     MASKED_IMG = IMG.*thresholdMask;

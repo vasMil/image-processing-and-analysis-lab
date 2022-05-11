@@ -13,7 +13,7 @@ thres = sortPix(round(length(sortPix)*r/100));
 for i=1:blockSize:M
     for j=1:blockSize:N        
         globalThresholdMask(i:i+blockSize-1,j:j+blockSize-1) =...
-            IMG(i:i+blockSize-1,j:j+blockSize-1) > thres;
+            IMG(i:i+blockSize-1,j:j+blockSize-1) >= thres;
     end
 end
 
