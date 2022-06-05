@@ -1,7 +1,10 @@
 function [correct_perc] = driver_helper(test_path, db_path, retr_func, ...
-    preserve_perc)
-    if nargin < 4
+    preserve_perc, blocksize)
+    if nargin < 5
         preserve_perc = 100;
+        blocksize = 100;
+    elseif nargin < 4
+        blocksize = 100;
     end
     % Get all the paths to *.jpg inside the test folder
     path_to_test_images = fullfile(test_path, "*.jpg");
@@ -19,12 +22,15 @@ function [correct_perc] = driver_helper(test_path, db_path, retr_func, ...
             fullfile(fileStruct(i).folder, fileStruct(i).name));
 
         % Find the path of the retrieved image from db
-        if preserve_perc == 100
+        if preserve_perc == 100 && blocksize == 100
             image_db_paths(i) = retr_func(image_test, ...
                 db_path);
-        else
+        elseif blocksize == 100
             image_db_paths(i) = retr_func(image_test, ...
                             db_path, preserve_perc);
+        else
+            image_db_paths(i) = retr_func(image_test, ...
+                            db_path, preserve_perc, blocksize);
         end
         
         % Display the two
