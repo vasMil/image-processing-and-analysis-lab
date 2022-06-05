@@ -2,9 +2,9 @@ function [image_db_path] = retrieveImage_histogram(image_test, db_path)
 [M,N,d] = size(image_test);
 
 % Preprocess image_test
-hist_test = zeros(256, d);
+hist_test = zeros(d, 256);
 for i=1:d
-    hist_test(:, i) = histcounts(image_test(:,:,i), 256)';
+    hist_test(i, :) = histcounts(image_test(:,:,i), 256);
 end
 
 % Process every image in the db
