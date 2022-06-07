@@ -28,15 +28,31 @@ imshow(log(abs(LENNA_GAUSS)), []);
 S_n = abs(fftshift(fft2(dlenna_r - lenna_gauss))).^2;
 S_f = abs(fftshift(fft2(dlenna_r))).^2;
 
-% Construct the smoothing filter Wiener - using the knowledge of S_n
-SMOOTH_WIENER = S_f./(S_f+S_n);
+% Construct the Wiener filter - using the knowledge of S_n
+WIENER = S_f./(S_f+S_n);
 % Apply the filter
-LENNA_SMOOTH = SMOOTH_WIENER.*LENNA_GAUSS;
+LENNA_WIENER = WIENER.*LENNA_GAUSS;
 
 % Construct the filter without using S_n
 WIENER_k = 1./(1+k);
 % Apply the filter
 LENNA_k = WIENER_k.*LENNA_GAUSS;
+
+% Construct the filter, approximating SNR, using an area of the image
+% that is somewhat smooth.
+figure(10);
+title("Select the area you want to approximate SNR with")
+subplot(1,2,1);
+imshow(lenna_gauss);
+subplot(1,2,2);
+imshow(lenna_r);
+g = round(ginput(2));
+g = double(lenna_gauss(g(1,2):g(2,2),g(1,1):g(2,1)));
+close 10;
+S_f_approx = mean(g(:));
+S_n_approx = std(g(:));
+WIENER_AREA_APPROX = S_f_approx./(S_f_approx+S_n_approx);
+LENNA_AREA_APPROX = WIENER_AREA_APPROX.*LENNA_GAUSS;
 
 % Construct the filter, approximating SNR, using blocking
 K = calcBlindWieners_k(lenna_gauss,3,3);
@@ -45,11 +61,14 @@ WIENER_blocking = 1./(1+K);
 LENNA_blocking = WIENER_blocking.*LENNA_GAUSS;
 
 % Get back to the spatial domain
-lenna_smooth = ifft2(ifftshift(LENNA_SMOOTH));
-lenna_smooth = lenna_smooth(1:M, 1:N);
+lenna_wiener = ifft2(ifftshift(LENNA_WIENER));
+lenna_wiener = lenna_wiener(1:M, 1:N);
 
 lenna_k = ifft2(ifftshift(LENNA_k));
 lenna_k = lenna_k(1:M, 1:N);
+
+lenna_area_approx = ifft2(ifftshift(LENNA_AREA_APPROX));
+lenna_area_approx = lenna_area_approx(1:M, 1:N);
 
 lenna_blocking = real(ifft2(ifftshift(LENNA_blocking)));
 lenna_blocking = lenna_blocking(1:M, 1:N);
@@ -75,31 +94,36 @@ title(strcat("AWGN of ", num2str(snr_db), "db"));
 
 figure(2);
 subplot(3,2,1);
-imshow(lenna_smooth, []);
+imshow(lenna_wiener, []);
 title("Wiener filter, using S_n/S_f");
 subplot(3,2,2);
 imshow(lenna_k, []);
 title(strcat("Blind Wiener filter, using k = ", num2str(k)));
 subplot(3,2,3);
+imshow(lenna_area_approx, []);
+title("Using a smooth area of the noisy image to approximate SNR");
+subplot(3,2,4);
 imshow(lenna_blocking, []);
 title("Bling Wiener filter, using blocking approx. of the SNR");
-subplot(3,2,4);
+subplot(3,2,5);
 imshow(lenna_mat, []);
 title("Using wiener2, supplying the noise variance");
-subplot(3,2,[5 6]);
+subplot(3,2,6);
 imshow(lenna_blindMat, []);
 title("Using wiener2, without the variance");
 
-MSE_noise = mean((dlenna_r-lenna_gauss).^2,'all');
-MSE_smooth = mean((dlenna_r-lenna_smooth).^2,'all');
-MSE_k = mean((dlenna_r-lenna_k).^2,'all');
-MSE_blocking = mean((dlenna_r-lenna_blocking).^2,'all');
-MSE_mat = mean((dlenna_r-lenna_mat).^2,'all');
-MSE_blindMat = mean((dlenna_r-lenna_blindMat).^2,'all');
+MSE_noise = immse(dlenna_r, lenna_gauss);
+MSE_wiener = immse(dlenna_r, lenna_wiener);
+MSE_k = immse(dlenna_r, lenna_k);
+MSE_area_approx = immse(dlenna_r, lenna_area_approx);
+MSE_blocking = immse(dlenna_r, lenna_blocking);
+MSE_mat = immse(dlenna_r, lenna_mat);
+MSE_blindMat = immse(dlenna_r, lenna_blindMat);
 
 disp(strcat("MSE_noise = ", num2str(MSE_noise)));
-disp(strcat("MSE_smooth = ", num2str(MSE_smooth)));
+disp(strcat("MSE_wiener = ", num2str(MSE_wiener)));
 disp(strcat("MSE_k = ", num2str(MSE_k)));
+disp(strcat("MSE_area_approx = ", num2str(MSE_area_approx)));
 disp(strcat("MSE_blocking = ", num2str(MSE_blocking)));
 disp(strcat("MSE_mat = ", num2str(MSE_mat)));
 disp(strcat("MSE_blindMat = ", num2str(MSE_blindMat)));

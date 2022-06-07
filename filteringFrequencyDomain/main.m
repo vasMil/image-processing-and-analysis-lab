@@ -109,7 +109,7 @@ moon_blur = alternatePixelSigns(moon_blur(1:M,1:N));
 % Devide with MN
 % REMINDER: The size of the matrix in the frequency domain is not [M, N]
 % but [P, Q] == [2*M, 2*N], thus you need to divide with 4*M*N.
-% Gonzales' formula (4-158, page 304 of the fourh edition) is the general
+% Gonzalez' formula (4-158, page 304 of the fourh edition) is the general
 % case formula!
 moon_blur = moon_blur/(4*M*N);
 

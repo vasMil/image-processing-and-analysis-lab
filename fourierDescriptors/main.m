@@ -7,10 +7,10 @@ clc;
 % rgb image, instead of using rgb2gray();
 min_expect_coef = 5;
 
-r = 1; % Ratio of the Fourier coefficients to preserve
-rot_deg = 90; % Rotate image
-scale = 1; % Resize image
-shift_pix = [0, 0]; % Translate image
+r = 0.3; % Ratio of the Fourier coefficients to preserve
+rot_deg = 94; % Rotate image
+scale = 1.3; % Resize image
+shift_pix = [2, 1]; % Translate image
 
 % Convert image to a binary one
 leaf = imread("../Images/exercise4/leaf.jpg");

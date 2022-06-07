@@ -11,13 +11,13 @@ d_sp = 0.2;
 % Construct noisy images - Additive White Gaussian Noise
 variance = 10^-(snr_db/10)*sum(tiger.^2, 'all')/(M*N-1);
 tiger_gauss = imnoise(tiger, 'gaussian', 0, variance);
-
+% Apply filters
 [gauss_movAvgMSE, gauss_medianMSE, gauss_movAvgSNR, gauss_medianSNR] =...
     filterPlotAndStatistics(tiger, tiger_gauss, 3, 3, "AWGN");
 
 % Construct noisy images - Salt & Pepper
 tiger_sp = imnoise(tiger, 'salt & pepper', d_sp);
-
+% Apply filters
 [sp_movAvgMSE, sp_medianMSE, sp_movAvgSNR, sp_medianSNR] =...
     filterPlotAndStatistics(tiger, tiger_sp, 5, 3, "Salt & Pepper");
 
@@ -31,6 +31,7 @@ tiger_noisy_med = medfilt2(tiger_noisy, [3 3]);
 tiger_filtered = movmean(tiger_noisy_med, 3);
 
 % Calculate some statistics
+MSE_noisy_med = mean((tiger - tiger_noisy_med).^2, 'all');
 MSE = mean((tiger - tiger_filtered).^2, 'all');
 SNR = 10*log10(sum(tiger.^2, 'all')/...
     sum((tiger-tiger_filtered).^2,'all'));
@@ -48,5 +49,6 @@ imshow(tiger_noisy_med);
 title("Noisy Image after Median filter");
 subplot(2,2,4);
 imshow(tiger_filtered);
-title("Noisy Image after successively applying a Median and a Moving average filter");
+title(["Noisy Image after successively applying",...
+    "a Median and a Moving average filter"]);
 
