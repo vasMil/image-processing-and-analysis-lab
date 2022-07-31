@@ -40,12 +40,12 @@ end
 
 % Create the cell array in each cell of which you will preserve a matrix or
 % an item (this cell array you will be returning)
-data = cell([dim_size', num_sampl]);
+data = zeros([dim_size', num_sampl]);
 for i=1:num_sampl
     if (magic_number(4) == 1)
-        data(i) = num2cell(fread(stream, dim_size'));
+        data(i) = fread(stream, dim_size');
     else
-        data(:,:,i) = num2cell(fread(stream, dim_size'));
+        data(:,:,i) = fread(stream, dim_size');
     end
 end
 
