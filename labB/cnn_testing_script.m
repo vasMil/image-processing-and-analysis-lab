@@ -23,4 +23,11 @@ CNN = CNN.CNN;
 
 %% Evaluate the test set of images using the CNN
 cnn_pred = classify(CNN, test_img);
-confMat = confusionMatrix(cnn_pred, test_lbl);
+% double(string(categorical_array)) is a trick with which I may convert the
+% categorical data back to numeric data, even though the conversion is not
+% possible.
+% double(categorical_array) - 1 is another way -uglier in my opinion-
+% A prettier way to do this is to use a mapper that will map
+% categorical to numeric.
+confMat = confusionMatrix(double(string(cnn_pred)), ...
+    double(string(test_lbl)));

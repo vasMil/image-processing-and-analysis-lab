@@ -8,8 +8,8 @@ end
 confMat = zeros(10,10);
 
 for i=1:length(predictions)
-    col = predictions(i);
-    row = actual_labels(i);
+    col = predictions(i) + 1;
+    row = actual_labels(i) + 1;
     confMat(row, col) = confMat(row, col) + 1;
     if col ~= row
         confMat(col,row) = confMat(col, row) + 1;
