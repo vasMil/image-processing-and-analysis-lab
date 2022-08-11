@@ -1,2 +1,5 @@
 labB_instructions/
 labB_resources/
+ConvNeurNet/trained_cnn.mat
+SVM_HOGFeatures/svm_mdl.mat
+SVM_customHOGFeatures/svm_myHog.mat
