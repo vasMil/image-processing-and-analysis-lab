@@ -2,9 +2,9 @@ function [hogVect] = HOGFeatures(img, cellSize, ...
     blockSize, blockOverlap, numBins)
 
 % Resize the image so it may be divided into cells of cellSize
-imgRes = floor(size(img) ./ cellSize) .* cellSize;
+% imgRes = floor(size(img) ./ cellSize) .* cellSize;
 % img = imresize(img, imgRes);
-img = img(1:imgRes(1), 1:imgRes(2));
+% img = img(1:imgRes(1), 1:imgRes(2));
 [m,n] = size(img);
 
 % Get the left bounds of each bin
@@ -27,14 +27,28 @@ gradDir = abs(gradDir);
 % Step2: Calculate the HOG for each cell and then normalize
 
 % Scan over each cell and calculate its HOG
+% Note: Could Merge the 4 for loops into 2. (maybe TODO:)
 cellBins = zeros([ceil([m n] ./ cellSize),numBins]);
 for i=1:cellSize(1):m
+    % Append the leftover pixels into the last row-cell
+    if (i+cellSize(1)-1 > m)
+        cellDim1_end = m - i + cellSize(1);
+    else
+        cellDim1_end = cellSize(1) - 1;
+    end
     for j=1:cellSize(2):n
-        for ci=0:cellSize(1)-1
-            for cj=0:cellSize(2)-1
-%                 if(gradMag(i+ci,j+cj) == 0)
-%                     continue;
-%                 end
+        % Append the leftover pixels into the last column-cell
+        if (j+cellSize(2)-1 > n)
+            cellDim2_end = n - j + cellSize(2);
+        else
+            cellDim2_end = cellSize(2) - 1;
+        end
+        
+        for ci=0:cellDim1_end
+            for cj=0:cellDim2_end
+                if(gradMag(i+ci,j+cj) == 0)
+                    continue;
+                end
                 angle = gradDir(i+ci,j+cj);
                 % The index of the boundary to the left of current angle
                 idx = floor(mod(angle, 180)/binSize_deg) + 1;
@@ -59,16 +73,15 @@ for i=1:cellSize(1):m
                 % the nidx variable.
 
                 % Assign the calculated magnitudes on the correct bins
-                cellBins( ...
-                    ceil(i/cellSize(1)), ceil(j/cellSize(2)), idx) = ...
-                    cellBins( ...
-                        ceil(i/cellSize(1)), ceil(j/cellSize(2)), idx) ...
-                    +  idx_magn;
-                cellBins( ...
-                    ceil(i/cellSize(1)), ceil(j/cellSize(2)), nidx) = ...
-                    cellBins( ...
-                        ceil(i/cellSize(1)), ceil(j/cellSize(2)), nidx) ...
-                    + nidx_magn;
+                cellBins(ceil(i/(cellDim1_end+1)), ...
+                    ceil(j/(cellDim2_end+1)), idx) = ...
+                    cellBins(ceil(i/(cellDim1_end+1)), ...
+                        ceil(j/(cellDim2_end+1)), idx) +  idx_magn;
+                    
+                cellBins(ceil(i/(cellDim1_end+1)), ...
+                    ceil(j/(cellDim2_end+1)), nidx) = ...
+                        cellBins(ceil(i/(cellDim1_end+1)), ...
+                        ceil(j/(cellDim2_end+1)), nidx) + nidx_magn;
             end
         end
     end
@@ -81,6 +94,10 @@ block_cnt = 0;
 hv_step = prod([numBins, blockSize]);
 for i=1:cell_step(1):cm-1
     for j=1:cell_step(2):cn-1
+        % Ignore the leftover cells
+        if(i+blockSize(1) - 1 > cm || j+blockSize(2) - 1 > cn)
+            continue;
+        end
         block = cellBins(i:i+blockSize(1) - 1, ...
                          j:j+blockSize(2) - 1, :);
         block = reshape(permute(block, [3 1 2]),[],1);

@@ -12,8 +12,8 @@ train_lbl = readMNIST(strcat(train_res, "train-labels.idx1-ubyte"));
 %% Extract the HOG features for the training set
 num_train_img = length(train_img);
 
-cellSize = [4 4];
-blockSize = [2 2];
+cellSize = [2 2];
+blockSize = [4 4];
 blockOverlap = blockSize/2;
 numBins = 9;
 BlocksPerImage = floor((size(train_img(:,:,1))./cellSize - blockSize)./ ...
